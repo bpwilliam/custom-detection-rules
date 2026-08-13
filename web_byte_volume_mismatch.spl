@@ -1,0 +1,8 @@
+index=botsv3 sourcetype=stream:http  earliest=0 src_ip IN ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16") dest_ip!="10.0.0.0/8" dest_ip!="172.16.0.0/12" dest_ip!="192.168.0.0/16"
+| fields src_ip dest_ip bytes_in bytes_out
+| eventstats sum(bytes_in) as SUMbytesreceived_inthiswindow, sum(bytes_out) as SUMbytessent_inthiswindow, count as numberof_conns_thiswindow by src_ip, dest_ip
+| eval sendreceive_ratio = SUMbytessent_inthiswindow / SUMbytesreceived_inthiswindow
+| where sendreceive_ratio > 10 AND SUMbytessent_inthiswindow > 5242880 AND numberof_conns_thiswindow > 10
+| rename src_ip as src, dest_ip as dest
+| stats sum(SUMbytessent_inthiswindow) as bytes_out, sum(SUMbytesreceived_inthiswindow) as bytes_in, values(numberof_conns_thiswindow) as source_count by src, dest
+| sort - sendreceive_ratio
