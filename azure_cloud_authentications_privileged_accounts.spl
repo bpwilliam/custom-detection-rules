@@ -1,0 +1,4 @@
+index=botsv3 sourcetype=ms:aad:signin earliest=0 app=azure:portal
+| fields user src_ip
+```| where src_ip!=[list of acceptable ips] ```
+| stats values(src_ip) as src by user
