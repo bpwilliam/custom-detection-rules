@@ -1,0 +1,5 @@
+index=botsv3 sourcetype=aws:cloudtrail earliest=0 eventName=ConsoleLogin
+| fields user src_ip "additionalEventData.LoginTo"
+| eventstats dc(user) as dc_user_usingloginurl by additionalEventData.LoginTo
+| where dc_user_usingloginurl <= 3 ```AND NOT sr_ip IN ([list of acceptable ips])```
+| stats values(src_ip) as src, values(additionalEventData.LoginTo) as dest by user
