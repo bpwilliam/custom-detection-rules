@@ -1,0 +1,4 @@
+index=botsv3 sourcetype=aws:cloudtrail earliest=0 eventName=CreateAccessKey 
+| fields userName user_name eventTime aws_account_id errorCode sourceIPAddress
+| where ```NOT (UserName IN (list of privileged users authorized to create access keys)) AND``` userName!=user_name
+| stats values(user_name) as accesskeys_createdfor_thisuser, values(eventTime) as generatedTime, values(aws_account_id) as AWSaccount, values(errorCode) as result, values(sourceIPAddress) as src_ip by userName
