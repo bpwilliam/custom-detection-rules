@@ -1,0 +1,6 @@
+index=botsv3 sourcetype=aws:cloudtrail earliest=0 eventName=TerminateInstances ```list of service accounts to exclude here ex. NOT user IN (list of service accounts)```
+| fields _time dest user
+| bin span=10min _time as timewindow
+| eventstats dc(dest) as dc_instances_thiswindow by user, timewindow
+| where dc_instances_thiswindow >= 5
+| stats values(dest) as dest by user
