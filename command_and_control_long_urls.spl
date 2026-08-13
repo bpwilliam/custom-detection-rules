@@ -1,0 +1,9 @@
+index=botsv3 sourcetype=stream:http src_ip IN ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16") NOT dest_ip IN ("10.0.0.0/8", "172.16.0.0/12","192.168.0.0/16") earliest=0
+| fields site uri_path src_ip 
+| eval theurl = site . uri_path, url_len=len(theurl)
+| eventstats avg(url_len) as AVGurl_len_forallhosts
+| where url_len > AVGurl_len_forallhosts*3
+| eventstats count as cnt by site
+| where cnt > 50
+| rename site as url_domain
+| stats values(url_len) as url_length, values(src_ip) as src, values(theurl) as url by url_domain
