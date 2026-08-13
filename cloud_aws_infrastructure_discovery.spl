@@ -1,0 +1,10 @@
+index=botsv3 sourcetype=aws:cloudtrail earliest=0 eventName IN ("DescribeClusters", "DescribeDBInstances", "DescribeDBSecurityGroups", "DescribeHosts", "DescribeInstances", "DescribeKeyPairs", "DescribeReservedInstances", "DescribeSecurityGroups", "GetBucketLocation", "GetUser", "ListAccessKeys", "ListBuckets", "ListGroups", "ListUsers") ```NOT userName IN (list of service accounts or privileged accounts allowed to execute discovery actions)``
+| fields _time userName eventName
+| bin span=1h _time as timewindow
+| streamstats current=false last(_time) as thelatesttimefound by userName, eventName, timewindow
+| eval gap_time = thelatesttimefound - _time
+| eventstats avg(gap_time) AS AVGgap_time, dc(eventName) as dc_eventName by userName, timewindow
+| where dc_eventName > 3 AND AVGgap_time < 15 AND AVGgap_time > 0
+| rename userName as user
+| convert timeformat="%a, %b %d, %Y %I:%M:%S %p" ctime(timewindow)
+| stats values(eventName) as app, values(timewindow) as Time by user
