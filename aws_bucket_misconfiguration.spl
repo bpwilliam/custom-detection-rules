@@ -1,0 +1,5 @@
+index=botsv3 sourcetype=aws:cloudtrail earliest=0 eventName=putbucketacl ```"NOT requestParameters.bucketName" IN ([bucket names allowed to be publicly accessible])```
+| fields "requestParameters.AccessControlPolicy.AccessControlList.Grant{}.Grantee.URI" "requestParameters.AccessControlPolicy.AccessControlList.Grant{}.Permission" "requestParameters.bucketName" "requestParameters.AccessControlPolicy.Owner.DisplayName" eventTime src_ip
+| mvexpand "requestParameters.AccessControlPolicy.AccessControlList.Grant{}.Grantee.URI"
+| where isnotnull(mvfilter(match('requestParameters.AccessControlPolicy.AccessControlList.Grant{}.Grantee.URI', "/global/")))
+| stats values("requestParameters.AccessControlPolicy.AccessControlList.Grant{}.Grantee.URI"), values("requestParameters.AccessControlPolicy.AccessControlList.Grant{}.Permission"), values("requestParameters.bucketName"), values("requestParameters.AccessControlPolicy.Owner.DisplayName"), values(eventTime) by src_ip
