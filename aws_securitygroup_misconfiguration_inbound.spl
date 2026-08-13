@@ -1,0 +1,10 @@
+index=botsv3 sourcetype="aws:cloudtrail" eventName=AuthorizeSecurityGroupIngress earliest=0 errorCode=success ```NOT object IN (securitygroup1, securitygroup2)```
+| fields "requestParameters.ipPermissions.items{}.ipRanges.items{}.cidrIp" "requestParameters.ipPermissions.items{}.ipRanges.items{}.cidrIpv6" "requestParameters.ipPermissions.items{}.fromPort" "requestParameters.ipPermissions.items{}.toPort" "requestParameters.ipPermissions.items{}.ipProtocol" object errorCode eventTime user src_ip
+| spath path="requestParameters.ipPermissions.items{}.ipRanges.items{}.cidrIp" output=permissiongrantedto_cidrIPs
+| spath path="requestParameters.ipPermissions.items{}.ipRanges.items{}.cidrIpv6" output=permissiongrantedto_cidrIPv6s
+| spath path="requestParameters.ipPermissions.items{}.fromPort" output=srcport
+| spath path="requestParameters.ipPermissions.items{}.toPort" output=destport
+| spath path="requestParameters.ipPermissions.items{}.ipProtocol" output=protocol
+| where permissiongrantedto_cidrIPs="0.0.0.0/0" OR permissiongrantedto_cidrIPv6s="::/0"
+| rename src_ip as src
+| stats values(object) as dest by user, src
